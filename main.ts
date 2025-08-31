@@ -96,10 +96,9 @@ const roundGeodistance = (
   radius: number,
   decimals: number = 4,
 ) => {
-  const factor = Math.pow(10, decimals);
   return {
-    lat: Math.round(lat * factor) / factor,
-    lon: Math.round(lon * factor) / factor,
+    lat: parseFloat(lat.toPrecision(decimals)).toFixed(13),
+    lon: parseFloat(lon.toPrecision(decimals)).toFixed(13),
     radius: radius.toPrecision(2),
   };
 };
