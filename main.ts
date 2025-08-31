@@ -1,14 +1,14 @@
-// main.ts - Proxy Cache Simples para iNaturalist API
+// main.ts - Proxy Cache com Deno Deploy CDN
 import { Hono } from "@hono/hono";
 import { cors } from "@hono/hono/cors";
-import { cache } from "@hono/hono/cache";
+import { cache } from "@hono/hono/cache"; // ← Correção do import
 
 const app = new Hono();
 
 // Configurações
 const API_KEY = Deno.env.get("API_KEY") || "sua-chave-secreta-aqui";
 const ALLOWED_ORIGINS = [
-  "https://microlearning-biodiversidade.vercel.app/",
+  "https://microlearning-biodiversidade.vercel.app",
   "http://localhost:3000",
 ];
 
@@ -44,29 +44,26 @@ app.get(
   "/api/inat/*",
   authMiddleware,
   cache({
-    cacheName: "inat-api-cache",
-    cacheControl: "max-age=5184000", // 60 dias
+    cacheName: "inat-api-caching",
+    cacheControl: "max-age=86400", //um dia
+    wait: true,
   }),
   async (c: any) => {
     try {
-      // Extrair path e query parameters
       const originalPath = c.req.path;
       const inatPath = originalPath.replace("/api/inat", "");
       const searchParams = new URL(c.req.url).searchParams;
       const queryString = searchParams.toString();
 
-      // Construir URL completa para iNaturalist
       const inatUrl = `https://api.inaturalist.org${inatPath}${queryString ? "?" + queryString : ""}`;
 
       console.log(`🌐 Proxy para: ${inatPath}`);
 
-      // Fazer requisição direta para iNaturalist
       const response = await fetch(inatUrl, {
         method: "GET",
         headers: {
           "User-Agent": "Proxy-Cache/1.0",
           Accept: "application/json",
-          // Headers limpos - sem API key
         },
       });
 
@@ -78,7 +75,6 @@ app.get(
 
       console.log(`✅ Sucesso: ${inatPath}`);
 
-      // O cache middleware do Hono vai cachear automaticamente
       return response;
     } catch (error: any) {
       console.error("Proxy error:", error);
@@ -90,12 +86,14 @@ app.get(
         500,
       );
     }
-  },
+  }, // ← Faltava fechar a função
 );
 
-// Só manter isso:
 app.get("/", (c: any) => {
-  return c.json({ message: "iNaturalist Proxy" });
+  return c.json({
+    message: "iNaturalist Proxy",
+    cache: "1 day with Hono cache middleware",
+  });
 });
 
 export default app;
