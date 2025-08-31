@@ -1,7 +1,7 @@
 // main.ts - Proxy Cache com Deno Deploy CDN
-import { Hono } from "@hono/hono";
+import { type Context, Hono } from "@hono/hono";
 import { cors } from "@hono/hono/cors";
-import { cache } from "@hono/hono/cache"; // ← Correção do import
+import { cache } from "@hono/hono/cache";
 
 const app = new Hono();
 
@@ -103,6 +103,29 @@ const roundGeodistance = (
   };
 };
 
+function fixedGBIFPath(c) {
+  const originalPath = c.req.path;
+  const gbifPath = originalPath.replace("/api/gbif", "");
+  const searchParams = new URL(c.req.url).searchParams;
+
+  //arredondar coordenadas
+  const geoDistanceParam = searchParams.get("geoDistance");
+  if (geoDistanceParam) {
+    const [lat, lon, radius] = geoDistanceParam.split(",");
+    const rounded = roundGeodistance(parseFloat(lat), parseFloat(lon), 4);
+
+    // Substituir no searchParams
+    searchParams.set(
+      "geoDistance",
+      `${rounded.lat},${rounded.lon},${rounded.radius}`,
+    );
+  }
+
+  const queryString = searchParams.toString();
+
+  return `https://api.gbif.org${gbifPath}${queryString ? "?" + queryString : ""}`;
+}
+
 // rota para buscar no gbif
 app.get(
   "/api/gbif/*",
@@ -110,32 +133,14 @@ app.get(
   cache({
     cacheName: "gbif-api-caching",
     cacheControl: "max-age=86400", //um dia
+    keyGenerator: (c: Context) => fixedGBIFPath(c),
     wait: true,
   }),
   async (c: any) => {
     try {
-      const originalPath = c.req.path;
-      const gbifPath = originalPath.replace("/api/gbif", "");
-      const searchParams = new URL(c.req.url).searchParams;
+      const gbifUrl = fixedGBIFPath(c);
 
-      //arredondar coordenadas
-      const geoDistanceParam = searchParams.get("geoDistance");
-      if (geoDistanceParam) {
-        const [lat, lon, radius] = geoDistanceParam.split(",");
-        const rounded = roundGeodistance(parseFloat(lat), parseFloat(lon), 4);
-
-        // Substituir no searchParams
-        searchParams.set(
-          "geoDistance",
-          `${rounded.lat},${rounded.lon},${rounded.radius}`,
-        );
-      }
-
-      const queryString = searchParams.toString();
-
-      const gbifUrl = `https://api.gbif.org${gbifPath}${queryString ? "?" + queryString : ""}`;
-
-      console.log(`🌐 Proxy para: ${gbifPath}`);
+      console.log(`🌐 Proxy para: ${gbifUrl}`);
 
       const response = await fetch(gbifUrl, {
         method: "GET",
@@ -151,7 +156,7 @@ app.get(
         );
       }
 
-      console.log(`✅ Sucesso: ${gbifPath}`);
+      console.log(`✅ Sucesso: ${gbifUrl}`);
 
       return response;
     } catch (error: any) {
