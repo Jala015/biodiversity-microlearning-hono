@@ -1,6 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --allow-env main.ts",
-    "start": "deno run --allow-net --allow-env main.ts"
+    "dev": "deno serve --allow-net --allow-env main.ts",
+    "start": "deno serve --allow-net --allow-env main.ts"
+  },
+
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono"
   }
 }
