@@ -110,6 +110,10 @@ app.get(
 
     console.log(
       `Consulta nominatim para latitude ${lat} e longitude ${lon}: ${JSON.stringify(nominatim)}`,
+      {
+        headers: {
+          Referer: "https://biodiv-microlearning-hono.deno.dev/"
+      },
     );
 
     if (!nominatim) {
