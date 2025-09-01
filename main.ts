@@ -108,6 +108,13 @@ app.get(
 
     const nominatim = await fetchResponse.json();
 
+    if (!nominatim) {
+      console.error("❌ Erro ao obter nome da cidade");
+      throw new Error("Erro ao obter nome da cidade");
+    } else {
+      console.log(`✅ Sucesso: Nome da cidade obtido: ${nominatim.name}`);
+    }
+
     return c.json({ cidade: nominatim.name });
   },
 );
