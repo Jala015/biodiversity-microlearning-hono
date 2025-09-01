@@ -117,7 +117,7 @@ const roundGeodistance = (
   lat: number,
   lon: number,
   radius: number,
-  decimals: number = 4,
+  decimals: number = 5,
 ) => {
   return {
     lat: parseFloat(lat.toPrecision(decimals)).toFixed(13),
@@ -126,26 +126,28 @@ const roundGeodistance = (
   };
 };
 
-function fixedGBIFPath(c) {
+function fixedGBIFPath(c, round_geo = true) {
   const originalPath = c.req.path;
   const gbifPath = originalPath.replace("/api/gbif", "");
   const searchParams = new URL(c.req.url).searchParams;
 
-  //arredondar coordenadas
-  const geoDistanceParam = searchParams.get("geoDistance");
-  if (geoDistanceParam) {
-    const [lat, lon, radius] = geoDistanceParam.split(",");
-    const rounded = roundGeodistance(
-      parseFloat(lat),
-      parseFloat(lon),
-      parseFloat(radius),
-    );
+  if (round_geo) {
+    //arredondar coordenadas
+    const geoDistanceParam = searchParams.get("geoDistance");
+    if (geoDistanceParam) {
+      const [lat, lon, radius] = geoDistanceParam.split(",");
+      const rounded = roundGeodistance(
+        parseFloat(lat),
+        parseFloat(lon),
+        parseFloat(radius),
+      );
 
-    // Substituir no searchParams
-    searchParams.set(
-      "geoDistance",
-      `${rounded.lat},${rounded.lon},${rounded.radius}`,
-    );
+      // Substituir no searchParams
+      searchParams.set(
+        "geoDistance",
+        `${rounded.lat},${rounded.lon},${rounded.radius}`,
+      );
+    }
   }
 
   const queryString = searchParams.toString();
@@ -165,7 +167,7 @@ app.get(
   }),
   async (c: any) => {
     try {
-      const gbifUrl = fixedGBIFPath(c);
+      const gbifUrl = fixedGBIFPath(c, false);
 
       console.log(`🌐 Proxy para: ${gbifUrl}`);
 
