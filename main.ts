@@ -89,6 +89,29 @@ app.get(
   }, // ← Faltava fechar a função
 );
 
+//rota para buscar nome da cidade atraves de latitude e longitude
+app.get(
+  "/cidade/",
+  authMiddleware,
+  cache({
+    cacheName: "inat-api-caching",
+    cacheControl: "max-age=86400", //um dia
+    wait: true,
+  }),
+  async (c) => {
+    const lat = c.req.param("lat");
+    const lon = c.req.param("lon");
+
+    const fetchResponse = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=0`,
+    );
+
+    const nominatim = await fetchResponse.json();
+
+    return c.json(nominatim.name);
+  },
+);
+
 // Função para arredondar coordenadas
 const roundGeodistance = (
   lat: number,
