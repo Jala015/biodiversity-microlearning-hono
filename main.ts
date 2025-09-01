@@ -91,7 +91,7 @@ app.get(
 
 //rota para buscar nome da cidade atraves de latitude e longitude
 app.get(
-  "/cidade",
+  "/api/cidade",
   authMiddleware,
   cache({
     cacheName: "inat-api-caching",
@@ -112,7 +112,8 @@ app.get(
       `Consulta nominatim para latitude ${lat} e longitude ${lon}: ${JSON.stringify(nominatim)}`,
       {
         headers: {
-          Referer: "https://biodiv-microlearning-hono.deno.dev/"
+          Referer: "https://biodiv-microlearning-hono.deno.dev/",
+        },
       },
     );
 
