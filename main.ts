@@ -108,7 +108,7 @@ app.get(
 
     const nominatim = await fetchResponse.json();
 
-    return c.json({cidade:nominatim.name});
+    return c.json({ cidade: nominatim.name });
   },
 );
 
@@ -135,7 +135,11 @@ function fixedGBIFPath(c) {
   const geoDistanceParam = searchParams.get("geoDistance");
   if (geoDistanceParam) {
     const [lat, lon, radius] = geoDistanceParam.split(",");
-    const rounded = roundGeodistance(parseFloat(lat), parseFloat(lon), 4);
+    const rounded = roundGeodistance(
+      parseFloat(lat),
+      parseFloat(lon),
+      parseFloat(radius),
+    );
 
     // Substituir no searchParams
     searchParams.set(
