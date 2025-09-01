@@ -18,7 +18,7 @@ app.use(
   cors({
     origin: ALLOWED_ORIGINS,
     allowMethods: ["GET"],
-    allowHeaders: ["X-API-Key", "Content-Type"],
+    allowHeaders: ["X-API-Key", "Content-Type", "Cache-Control"],
   }),
 );
 
@@ -91,7 +91,7 @@ app.get(
 
 //rota para buscar nome da cidade atraves de latitude e longitude
 app.get(
-  "/cidade/",
+  "/cidade",
   authMiddleware,
   cache({
     cacheName: "inat-api-caching",
