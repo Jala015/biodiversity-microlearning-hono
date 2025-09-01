@@ -99,8 +99,8 @@ app.get(
     wait: true,
   }),
   async (c) => {
-    const lat = c.req.param("lat");
-    const lon = c.req.param("lon");
+    const lat = parseFloat(c.req.param("lat"));
+    const lon = parseFloat(c.req.param("lon"));
 
     const fetchResponse = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=0`,
