@@ -103,7 +103,7 @@ app.get(
     const lon = c.req.query("lon");
 
     const fetchResponse = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=0`,
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=12&addressdetails=0`,
     );
 
     const nominatim = await fetchResponse.json();
