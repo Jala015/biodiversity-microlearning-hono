@@ -108,7 +108,7 @@ app.get(
 
     const nominatim = await fetchResponse.json();
 
-    return c.json(nominatim.name);
+    return c.json({cidade:nominatim.name});
   },
 );
 
